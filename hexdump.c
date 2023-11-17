@@ -1,4 +1,4 @@
-
+// This is the 2023 edition - I just keep doing this!
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -57,9 +57,9 @@ int main(int argc, char *argv[])
     printf("\n");
 
     if (file != stdin)
-      printf("%-*s  ", offset_width, "Offset");
+      printf("%-*s ", offset_width, "Offset");
 
-    printf("%-*s   Characters\n", (READ_BLOCK_SIZE*3)+1, "Bytes");
+    printf(" %-*s   Characters\n", (READ_BLOCK_SIZE*3)+1, "Bytes");
 
     while ((bytes_got = fread(buff, 1, READ_BLOCK_SIZE, file) ) > 0) {
       if (file != stdin)
