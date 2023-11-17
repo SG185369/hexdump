@@ -22,26 +22,32 @@ int main(int argc, char *argv[])
     printf("Usage:\n%s {options} file ...\n", argv[0]);
     printf("Options:\n");
     printf("  -help  Show this information:\n");
+    printf("'-' may be specified as a file to handle piped input\n");
     exit(0);
   }
 
   for (int i = 1; i < argc; i++) 
   {
-    // get the file stat info and try to open it
-    if ((stat(argv[i], &file_stat)) || ((file = fopen(argv[i], "r")) == NULL))
-    {
-      perror(argv[i]);
-      continue;
-    }
-
-    // determine how wide the offset needs to be
-    //   maybe add an option to force something specific?
-    sprintf(buff, "%llx", file_stat.st_size);
-    offset_width = strlen(buff);
-    if (offset_width < 6)
-      offset_width = 6;
+    if (!strcmp(argv[i], "-"))
+      file = stdin;
     else
-      offset_width = (((offset_width + 1) / 2) * 2);
+    {
+      // get the file stat info and try to open it
+      if ((stat(argv[i], &file_stat)) || ((file = fopen(argv[i], "r")) == NULL))
+      {
+        perror(argv[i]);
+        continue;
+      }
+
+      // determine how wide the offset needs to be
+      //   maybe add an option to force something specific?
+      sprintf(buff, "%llx", file_stat.st_size);
+      offset_width = strlen(buff);
+      if (offset_width < 6)
+        offset_width = 6;
+      else
+        offset_width = (((offset_width + 1) / 2) * 2);
+    }
 
     if (i > 1)
       printf("\n");
@@ -49,10 +55,15 @@ int main(int argc, char *argv[])
     for (int j = 0; j < strlen(argv[i]); j++)
       printf("=");
     printf("\n");
-    printf("%-*s  %-*s   Characters\n", offset_width, "Offset", (READ_BLOCK_SIZE*3)+1, "Bytes");
+
+    if (file != stdin)
+      printf("%-*s  ", offset_width, "Offset");
+
+    printf("%-*s   Characters\n", (READ_BLOCK_SIZE*3)+1, "Bytes");
 
     while ((bytes_got = fread(buff, 1, READ_BLOCK_SIZE, file) ) > 0) {
-      printf("%0*x ", offset_width, bytes_offset);
+      if (file != stdin)
+        printf("%0*x ", offset_width, bytes_offset);
       for (int j = 0; j < bytes_got; j++) {
         printf(" %02x", buff[j]);
         if (((j+1) % 8) == 0) printf(" ");
@@ -68,5 +79,8 @@ int main(int argc, char *argv[])
       printf("\n");
       bytes_offset += READ_BLOCK_SIZE;
     }
+    if (file != stdin)
+      fclose(file);
   }
+  exit(0);
 }
