@@ -51,13 +51,14 @@ int main(int argc, char *argv[])
 
     if (i > 1)
       printf("\n");
-    printf("%s\n", argv[i]);
-    for (int j = 0; j < strlen(argv[i]); j++)
-      printf("=");
-    printf("\n");
+    if (file != stdin) {
+      printf("%s\n", argv[i]);
+      for (int j = 0; j < strlen(argv[i]); j++)
+        printf("=");
+      printf("\n");
 
-    if (file != stdin)
       printf("%-*s ", offset_width, "Offset");
+    }
 
     printf(" %-*s   Characters\n", (READ_BLOCK_SIZE*3)+1, "Bytes");
 
